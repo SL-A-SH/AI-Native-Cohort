@@ -1,0 +1,22 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# LaTeX build artefacts — preprint.pdf is committed deliberately, the rest is noise
+week1/deliverables/student-project/paper/*.aux
+week1/deliverables/student-project/paper/*.log
+week1/deliverables/student-project/paper/*.out
+week1/deliverables/student-project/paper/*.bbl
+week1/deliverables/student-project/paper/*.blg
+week1/deliverables/student-project/paper/*.synctex.gz
+week1/deliverables/student-project/paper/*.fls
+week1/deliverables/student-project/paper/*.fdb_latexmk
+
+# OS
+.DS_Store
+Thumbs.db
+
+week1/deliverables/student-project/notes
