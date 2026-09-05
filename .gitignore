@@ -15,8 +15,11 @@ week1/deliverables/student-project/paper/*.synctex.gz
 week1/deliverables/student-project/paper/*.fls
 week1/deliverables/student-project/paper/*.fdb_latexmk
 
+week2/deliverables/student-project/social
+
 # OS
 .DS_Store
 Thumbs.db
 
 week1/deliverables/student-project/notes
+week2/deliverables/student-project/notes
