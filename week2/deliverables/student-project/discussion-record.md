@@ -4,22 +4,24 @@ Per assignment §7. Every useful human answer records **exactly one** outcome: a
 assumption, a new failure condition, a new test, a change to the agent, a change to the
 probability model, or no change with the reason.
 
-**Status, 2026-09-04:** 2 of 5 required communities engaged. 2 of 10 required contributions
-posted as opening posts, plus 2 replies posted inside r/roguelikedev, so 4 contributions total.
-2 of 5 required discussions with two or more replies **complete**: r/GameAI drew three replies,
-r/roguelikedev drew five.
+**Status, 2026-09-05.** The tutor has confirmed the Reddit and X participation quotas are not
+compulsory, so this file stopped being a checklist and is now what it should have been from the
+start: the record of what human answers actually changed about the work.
 
-**Outstanding before this file is submittable:**
+Nine answers across three threads. Two on Reddit (r/GameAI, three replies; r/roguelikedev,
+five replies) and one comment on the day one LinkedIn post. Every one of the nine produced a
+recorded outcome, and six of them changed the design.
 
-- Thread URLs. Every `[LINK: fill in]` below must be replaced with the real permalink. A link
-  without an explanation does not complete the task, and an explanation without a link does
-  not either.
-- Three more communities, at two contributions each. Drafts are in
-  `social/reddit-questions.md`: r/gamedev A, r/truegaming A, r/unrealengine A are the next
-  three.
-- Six of the eight replies in `social/reddit-replies.md` are **still unposted** (both roguelikedev
-  R4 and R5 replies have gone out). Post the rest, then update the "My next answer" column with
-  what actually went out and anything it drew.
+**Outstanding:**
+
+- Thread URLs. Every `[LINK: fill in]` below must be replaced with the real permalink before
+  the preprint cites any of this. A link without an explanation does not complete the task,
+  and an explanation without a link does not either.
+- Six of the eight Reddit replies in `social/reddit-replies.md` are still unposted; the two
+  roguelikedev ones have gone out. R9 has had no reply at all. Posting them is now optional
+  rather than required, but R5, R7 and R9 each asked a question whose answer would change what
+  goes in the paper, so they are worth sending.
+- Verification owed on R9's two examples before either reaches the preprint. See that entry.
 
 ---
 
@@ -35,6 +37,7 @@ r/roguelikedev drew five.
 | R6 | Reddit | r/roguelikedev | [LINK: fill in] | as R4 | Unerring chase is annoying; omniscience is fine for a psionic because it is thematically justified; tiered behaviour: engage on sight, move relative to last known on losing LOS, and on fully losing, warn others, call reinforcements, or return to previous tasks | Named legibility as the real axis, admitted my action set has no way to stop, asked what makes giving up read as reasonable rather than broken | **Change to the agent:** add a sixth action, `resume_post` |
 | R7 | Reddit | r/roguelikedev | [LINK: fill in] | as R4 | Challenged whether a probability field is what a person actually does; a hot/cold scent trail is enough; you need a hierarchy of senses (sight beats a noise next door) and a trail can be broken by water; monsters enter a "where did they go?" state where they look around and **pace back and forth to show their consternation**, then return to patrol | Agreed the grid is bookkeeping not cognition, mapped the sense hierarchy onto likelihood weights, said the pacing had caught me out, asked how long the state runs before it reads as a bug | **New failure condition, redefined:** the failure is not oscillation, it is *unbounded and illegible* oscillation |
 | R8 | Reddit | r/roguelikedev | [LINK: fill in] | as R4 | On losing LOS, record the last position **and a vector towards it**; move to the position, then continue along the vector; after a few turns return to idle or patrol, and back to the patrol zone if it has one | Pointed out the vector is a one-step prediction where everyone else stores only a point, asked whether it updates after LOS breaks and whether it bends round corners | **New assumption:** shipped memory models form a ladder of increasingly lossy approximations to a Bayes filter |
+| R9 | LinkedIn | comment on the day one post | [LINK: fill in] | Day one post: building a game AI whose objective is to lose convincingly | Do not make the AI as optimal as possible. NPCs are usually advised to miss the first couple of shots so the player can react (e.g. Uncharted 4); when a player hides, some teams path the enemy *closer* to build tension and offer a takedown (e.g. Horizon Zero Dawn). Also assumed the project uses flow fields | Not yet replied | **No change, with the reason:** this is a limitation to state, not a mechanism to build |
 
 ---
 
@@ -345,9 +348,75 @@ record.
 
 ---
 
-## Reading across all eight
+## R9. LinkedIn, comment on the day one post: the thing the cost function cannot express
 
-Three things the two threads did that I could not have done alone.
+**Link:** [LINK: fill in]
+
+**What they said.** Encouragement, an assumption that the project uses flow fields, and then
+the part that matters: do not try to make the AI as optimal as possible, because AI serves
+gameplay. Two examples. If the NPC can shoot, "you are usually advised to miss the first
+couple of shoots to give the player time to react to being found (e.g. Uncharted 4)". And if
+the NPC is searching for a hidden player, "some teams have the enemy path closer to the
+player to make the situation more tense but also to give players a chance for a takedown
+(e.g. Horizon zero dawn)". Closing warning about sharing a flow field between differently
+sized entities, which does not apply here.
+
+**Why the second example is a problem for my framing, and the first one too.**
+My cost function prices two errors: an agent that is too good, which reads as cheap, and one
+that is too bad, which reads as stupid. Both are *errors*, and the design question I set
+myself is where to put the optimum between them.
+
+Neither example is an error. Pathing an enemy *closer* to a hidden player requires knowing
+exactly where that player is, and then spending that knowledge on tension and on giving the
+player a takedown opportunity. Missing the first two shots on purpose is a grace period, not
+degraded aim. Both are choreography: ground truth used to stage a moment.
+
+An agent that selects actions by expected cost over a belief cannot express either of them.
+It has no representation of a moment, of pacing, or of what the player is about to be given a
+chance to do. This is a real hole in the premise and it is the strongest external challenge
+the project has had.
+
+**It also confirms [A-07] a fourth time, and harder than the other three.** Halo 2, the Alien:
+Isolation director and the vision cone practitioner all describe knowledge being *removed*
+from ground truth. These two describe ground truth being *used*, deliberately, against the
+NPC's own interest. Same starting point, more active. Subtractive belief is not just how
+shipped AI is built, it is what makes the choreography possible in the first place: you cannot
+stage a near miss without knowing where the player is.
+
+**Outcome, exactly one: no change, with the reason.**
+
+> Nothing in the agent, the belief model or the experiment changes. Four days remain, the
+> scope is locked, and choreography is not a parameter to add to the cost function: it is a
+> different kind of system, one that acts on the story rather than on a belief. Adding a
+> gestural version in the time available would produce an unargued term in the cost function,
+> which is the failure the scope decisions exist to prevent.
+>
+> It goes in **Limitations** instead, stated plainly: this project models believability as a
+> cost trade-off between two errors, and shipped practice suggests at least some of what reads
+> as believable is not on that axis at all. It also goes in **Conclusion and new questions**,
+> because "can a belief-based agent be given a dramatic objective without becoming scripted?"
+> is a better open question than any I had.
+
+**Verification owed before any of this reaches the preprint.** The commenter hedged every
+claim himself: "usually advised", "some teams", "I can't remember why". That is folklore
+recalled in a comment box, and it is exactly the shape of the F.E.A.R. and Halo claim that
+turned out to be wrong (see the AI errors section of `research-file.md`). Do not write
+"Uncharted 4 does X" or "Horizon Zero Dawn does Y" without a primary source. "A developer
+told me teams do this" is honest, needs no source, and is enough to carry the limitation.
+
+**A second, separate finding: how the work reads to practitioners.** He assumed the project
+uses flow fields. It does not. A flow field stores a direction per cell for pathfinding; this
+stores a probability per cell for state estimation. Different structure, different purpose.
+But this is the second person to map the belief grid onto the nearest familiar thing, and
+where the first (a scent trail, R5) was genuinely close, this one is not. So "a grid of
+numbers over a level" reads as *flow field* to a game developer, and the paper needs one
+sentence separating them early, or the method gets misread before it is read.
+
+---
+
+## Reading across all nine
+
+Six things the threads did that I could not have done alone.
 
 1. **The motivation got stronger and changed direction.** I went in expecting to find that
    games do this probabilistically somewhere. Three independent sources say the opposite, and
@@ -369,8 +438,16 @@ Three things the two threads did that I could not have done alone.
    Lined up ([A-09], R8) they form a ladder of lossy approximations to the same filter, which
    is a far better frame than "here are some things games do".
 
+6. **The premise took its first real hit, and it came from LinkedIn rather than Reddit.** R9's
+   two examples are not degraded agents, they are choreography: an enemy pathing *toward* a
+   hidden player to build tension, and a grace period of deliberate misses. My cost function
+   has an axis running from too good to too bad, and neither example sits anywhere on it. That
+   is a limitation I did not have and could not have written without being told.
+
 **What this does not settle.** The believability proxy is still undecided, and it is still the
-thing that blocks the experiment design. R6 gave a better *framing* for it, not a computable
-measure. The three unposted questions (r/gamedev A on the proxy, r/truegaming A on which error
-costs more, r/unrealengine A on perception systems) are all aimed at it, and r/gamedev A should
-go up first for that reason.
+thing that blocks the experiment design. R6 gave a better *framing* for it and `evidence_ratio`
+in `src/belief.py` is the first computable version of that framing, but it measures whether an
+action is attributable, not whether it is believable, and the gap between those two is the
+whole open question. R9 widens it: if some of what reads as believable is choreography rather
+than reasoning, then no measure taken over a belief can capture all of it, and the paper has to
+say so rather than imply the proxy is complete.
