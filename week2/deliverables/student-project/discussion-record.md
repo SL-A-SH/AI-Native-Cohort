@@ -444,10 +444,14 @@ Six things the threads did that I could not have done alone.
    has an axis running from too good to too bad, and neither example sits anywhere on it. That
    is a limitation I did not have and could not have written without being told.
 
-**What this does not settle.** The believability proxy is still undecided, and it is still the
-thing that blocks the experiment design. R6 gave a better *framing* for it and `evidence_ratio`
-in `src/belief.py` is the first computable version of that framing, but it measures whether an
-action is attributable, not whether it is believable, and the gap between those two is the
-whole open question. R9 widens it: if some of what reads as believable is choreography rather
-than reasoning, then no measure taken over a belief can capture all of it, and the paper has to
-say so rather than imply the proxy is complete.
+**What this settles, and what it does not.** The believability proxy is chosen: the evidence
+ratio in `src/belief.py`, which is R6's legibility framing made computable, and which was
+measured on 2026-09-10 and behaves as it should (see `research-file.md`). That unblocks the
+experiment design, which it was holding up.
+
+What it does not settle is what the proxy is worth. It measures whether an action is
+*attributable*, not whether it is *believable*, and R9 says that gap is structural rather than
+a matter of refinement: if some of what reads as believable is choreography, staged with ground
+truth, then no measure taken over a belief can capture it at all. So the paper has to present
+the ratio as covering the fairness half and say plainly that the drama half is outside the
+model, rather than implying the proxy is complete.

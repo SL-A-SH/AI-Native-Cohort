@@ -180,7 +180,27 @@ def has_line_of_sight(a: tuple[int, int], b: tuple[int, int]) -> bool:
     return all(is_free(cell) for cell in line_cells(a, b)[1:-1]) and is_free(a) and is_free(b)
 
 
+_VISIBILITY_CACHE: dict[tuple[tuple[int, int], float], np.ndarray] = {}
+
+
 def visible_from(cell: tuple[int, int], radius: float = 7.0) -> np.ndarray:
+    """Cached wrapper. See `_visible_from` for what it computes and why it is shaped this way.
+
+    The map never changes during a run, so a visibility mask is computed at most once per
+    (cell, radius) pair. Without this the agent recomputes line of sight to all 201 cells
+    several times per tick, which dominated the runtime of the sweep: caching is what makes a
+    multi-seed run affordable, and lesson 6 says a single seed is not a result.
+
+    The returned array is shared, not copied, so callers must treat it as read-only. Every
+    caller currently uses it as a mask, which is why that is worth the speed.
+    """
+    key = (cell, radius)
+    if key not in _VISIBILITY_CACHE:
+        _VISIBILITY_CACHE[key] = _visible_from(cell, radius)
+    return _VISIBILITY_CACHE[key]
+
+
+def _visible_from(cell: tuple[int, int], radius: float = 7.0) -> np.ndarray:
     """Boolean mask of free cells the agent can see from `cell`.
 
     A plain radius plus line of sight, with no facing and no vision cone. [ASSUMED] and

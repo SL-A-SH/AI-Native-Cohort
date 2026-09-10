@@ -286,11 +286,35 @@ dormant or did not exist. Rule: open every handle before recording it.
 
 ### Parts of the problem that are not yet clear
 
-- **What "believable" is measured against, given no user study.** This is now the single
-  largest open question, and it is the one that determines whether the experiment means
-  anything. Candidate proxies: capture rate held inside a target band, time-to-detection
-  distribution, path predictability, number of times the agent re-searches a cleared cell.
-  None of these is believability. Whichever is chosen must be argued for and labelled as a
-  proxy.
+- **What "believable" is measured against, given no user study.** ~~The single largest open
+  question.~~ **PARTLY SETTLED, 2026-09-10.** The proxy is chosen, implemented and measured;
+  what remains open is narrower and better understood.
+
+  The original candidates were capture rate held inside a target band, time-to-detection
+  distribution, path predictability, and how often the agent re-searches a cleared cell. All
+  four are still worth logging, but none is the primary measure, because each is a statement
+  about outcomes rather than about whether the agent's behaviour is *readable*.
+
+  **The chosen proxy is the evidence ratio** (`BeliefGrid.evidence_ratio`, `src/belief.py`),
+  which came out of R6 and is the computable half of that answer. A second belief runs in
+  parallel receiving no positive observations, only diffusion and the results of failed
+  searches. The ratio between the two at a given cell says how much of the agent's confidence
+  there is owed to something the player actually did. Above 1 is attributable; at or below 1
+  means the agent would have drifted to that belief regardless, so an action taken on it cannot
+  be traced to any event.
+
+  Measured behaviour, from a run on 2026-09-10: 1.00 before any observation, 11.05 the moment a
+  sound is heard, 4.41 after 33 ticks of diffusion, and after a failed search 157 of 201 cells
+  sit below 1.0 with a median of 0.64. So it discriminates, it decays with staleness the way it
+  should, and it is cheap to compute.
+
+  **It must be argued for and labelled a proxy everywhere, and there are two specific reasons
+  it is not a measurement of believability.** First, a design choice: the parallel belief does
+  receive failed searches, so the ratio isolates what the *player* caused rather than what the
+  agent did to itself, and a different choice would give a different measure. Second, and
+  larger, R9: shipped practice includes choreography, where ground truth is spent deliberately
+  on staging a moment. Nothing in a belief-based cost function can represent that, so the ratio
+  captures at most the *fairness* half of believability and none of the *drama* half. Both
+  points go in Limitations.
 - How many episodes count as a "case" for the 30 to 50 requirement: one episode per case, or
   one map-and-start-position configuration per case with several episodes each.
