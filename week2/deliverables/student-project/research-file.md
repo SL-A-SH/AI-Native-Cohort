@@ -260,6 +260,40 @@ between those two worlds is a better motivation for the paper than "F.E.A.R. did
 already". Cited correctly it becomes the related-work section. Cited as given it would have
 been a factual error in a published preprint.
 
+> ### ERROR 3, 2026-09-10: the gap above does not exist. [A-07] is dead.
+>
+> The practitioner review (§11, finding 6.1) pointed out that **Damián Isla** — the same author
+> whose Halo 2 talk is cited above as the *discrete* baseline — published the probabilistic
+> version in a games venue, and then shipped a game built on it. Both checked before recording:
+>
+> - **Isla, "Probabilistic Target Tracking and Search Using Occupancy Maps",** *AI Game
+>   Programming Wisdom 3* (2006), pp. 379-388. Introduces occupancy maps to a game AI audience:
+>   a discrete grid of probabilities over space, where each value is confidence the target is in
+>   that area, used by an NPC to decide where to move to find the target, explicitly to produce
+>   "more interesting and realistic searching behaviors".
+> - **Isla, "Third Eye Crime: Building a Stealth Game Around Occupancy Maps",** AIIDE 2013. A
+>   commercial stealth game by Moonshot Games whose core mechanic *is* the occupancy map.
+>
+> So the claim that games represent belief only discretely, and that the probabilistic
+> machinery lives in robotics, is false. It was published for game developers twenty years ago
+> and shipped as a game's central mechanic in 2013. The grid, the diffusion and cell-scope
+> negative information are all prior art, and the reviewer believes clearing seen cells and
+> renormalising is the core of the 2006 chapter. **Read both before writing another line of
+> related work**, per the rule that produced this section in the first place.
+>
+> **This is the same mistake as Error 1, made a second time and defended for longer.** Error 1
+> was accepting an AI claim that F.E.A.R. and Halo shipped probabilistic belief. The correction
+> replaced it with an appealing gap, and the gap was never checked against the games literature
+> with the same rigour applied to the original claim. Three Reddit commenters and one LinkedIn
+> commenter appeared to confirm it, which was treated as evidence; none of them had read the
+> games AI literature either, and agreement is not verification.
+>
+> **What survives.** Not the motivation. The contribution is now the cost function alone: the
+> three believability terms and the attributability measure. That is a narrower paper, and the
+> same review found real bugs in three of those terms, so it is also a paper with more work in
+> front of it. The honest framing is a replication of a known technique with a novel cost
+> function over it, evaluated against baselines, on one map, with the negative results reported.
+
 **Error 2, recorded on my previous agent and listed here so it is not repeated.** An
 assistant proposed X accounts for POMDP academics; verification showed the accounts were
 dormant or did not exist. Rule: open every handle before recording it.

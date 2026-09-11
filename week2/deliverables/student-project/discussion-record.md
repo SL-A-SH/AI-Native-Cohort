@@ -29,21 +29,21 @@ recorded outcome, and six of them changed the design.
 
 | # | Platform | Community | Link | My first contribution | Human answer (compressed) | My next answer | Outcome recorded |
 |---|---|---|---|---|---|---|---|
-| R1 | Reddit | r/GameAI | [LINK: fill in] | Post: do any shipped games keep a probability distribution over player position, or is it always last-known-position plus awareness levels? | Pointed me at the Alien: Isolation writeup as adjacent territory | Read it, reported what it actually says, asked whether the shrinking search radius is tied to where the alien has already been | **New assumption:** shipped game AI derives belief *subtractively* from ground truth, not additively from evidence |
-| R2 | Reddit | r/GameAI | [LINK: fill in] | as R1 | Game AI has no sensor noise by default because the engine knows the pixel-level position; what ships is artificial reduction of accuracy, via vision cones and sensor malfunction | Named the subtractive/additive split, adopted his description as a second baseline, asked whether a failed search leaves any trace | **New test:** second baseline, "degraded omniscience" |
-| R3 | Reddit | r/GameAI | [LINK: fill in] | as R1 | Computationally suicidal to solve for noise; you have a clean room, optimise for the clean room; simulate the concept instead; realism is rarely healthy for a game | Agreed on realism from the other direction, conceded the cost point, asked which cheap approximation he considers the fair one to beat | **New test:** indistinguishability against a cheap scripted approximation |
-| R4 | Reddit | r/roguelikedev | [LINK: fill in] | Post: how long should a monster remember, and what does it do while it forgets? Uniform diffusion or weighted toward exits? | Send the monster to points of interest (exits, heal sources), or to nearby sound sources | Mapped it onto a weighted transition model, made it a switchable policy, asked whether POI weighting ever read as *too* smart | **Change to the probability model:** POI-weighted diffusion as policy B |
-| R5 | Reddit | r/roguelikedev | [LINK: fill in] | as R4 | Last tile seen plus timestamp, then follow a heat trail (Brogue's scent); timers configurable per NPC type; hunter follows longer, grunt gives up; "if that room has two doors and I exit, it will give up after it sees the room empty" | Retracted my claim, proposed that a scent trail is a lossy form of the same belief field, asked whether the give-up rule uses the room's exits | **New assumption** (replacing a wrong one): negative information *is* implemented in practice, but scoped to a room as a give-up rule, not to a cell as a likelihood |
-| R6 | Reddit | r/roguelikedev | [LINK: fill in] | as R4 | Unerring chase is annoying; omniscience is fine for a psionic because it is thematically justified; tiered behaviour: engage on sight, move relative to last known on losing LOS, and on fully losing, warn others, call reinforcements, or return to previous tasks | Named legibility as the real axis, admitted my action set has no way to stop, asked what makes giving up read as reasonable rather than broken | **Change to the agent:** add a sixth action, `resume_post` |
-| R7 | Reddit | r/roguelikedev | [LINK: fill in] | as R4 | Challenged whether a probability field is what a person actually does; a hot/cold scent trail is enough; you need a hierarchy of senses (sight beats a noise next door) and a trail can be broken by water; monsters enter a "where did they go?" state where they look around and **pace back and forth to show their consternation**, then return to patrol | Agreed the grid is bookkeeping not cognition, mapped the sense hierarchy onto likelihood weights, said the pacing had caught me out, asked how long the state runs before it reads as a bug | **New failure condition, redefined:** the failure is not oscillation, it is *unbounded and illegible* oscillation |
-| R8 | Reddit | r/roguelikedev | [LINK: fill in] | as R4 | On losing LOS, record the last position **and a vector towards it**; move to the position, then continue along the vector; after a few turns return to idle or patrol, and back to the patrol zone if it has one | Pointed out the vector is a one-step prediction where everyone else stores only a point, asked whether it updates after LOS breaks and whether it bends round corners | **New assumption:** shipped memory models form a ladder of increasingly lossy approximations to a Bayes filter |
-| R9 | LinkedIn | comment on the day one post | [LINK: fill in] | Day one post: building a game AI whose objective is to lose convincingly | Do not make the AI as optimal as possible. NPCs are usually advised to miss the first couple of shots so the player can react (e.g. Uncharted 4); when a player hides, some teams path the enemy *closer* to build tension and offer a takedown (e.g. Horizon Zero Dawn). Also assumed the project uses flow fields | Not yet replied | **No change, with the reason:** this is a limitation to state, not a mechanism to build |
+| R1 | Reddit | r/GameAI | https://www.reddit.com/r/gameai/comments/1w5uf2p/do_any_shipped_games_actually_keep_a_probability/ | Post: do any shipped games keep a probability distribution over player position, or is it always last-known-position plus awareness levels? | Pointed me at the Alien: Isolation writeup as adjacent territory | Read it, reported what it actually says, asked whether the shrinking search radius is tied to where the alien has already been | **New assumption:** shipped game AI derives belief *subtractively* from ground truth, not additively from evidence |
+| R2 | Reddit | r/GameAI | https://www.reddit.com/r/gameai/comments/1w5uf2p/do_any_shipped_games_actually_keep_a_probability/ | as R1 | Game AI has no sensor noise by default because the engine knows the pixel-level position; what ships is artificial reduction of accuracy, via vision cones and sensor malfunction | Named the subtractive/additive split, adopted his description as a second baseline, asked whether a failed search leaves any trace | **New test:** second baseline, "degraded omniscience" |
+| R3 | Reddit | r/GameAI | https://www.reddit.com/r/gameai/comments/1w5uf2p/do_any_shipped_games_actually_keep_a_probability/ | as R1 | Computationally suicidal to solve for noise; you have a clean room, optimise for the clean room; simulate the concept instead; realism is rarely healthy for a game | Agreed on realism from the other direction, conceded the cost point, asked which cheap approximation he considers the fair one to beat | **New test:** indistinguishability against a cheap scripted approximation |
+| R4 | Reddit | r/roguelikedev | https://www.reddit.com/r/roguelikedev/comments/1w5xgp3/how_long_should_a_monster_remember_and_what_does/ | Post: how long should a monster remember, and what does it do while it forgets? Uniform diffusion or weighted toward exits? | Send the monster to points of interest (exits, heal sources), or to nearby sound sources | Mapped it onto a weighted transition model, made it a switchable policy, asked whether POI weighting ever read as *too* smart | **Change to the probability model:** POI-weighted diffusion as policy B |
+| R5 | Reddit | r/roguelikedev | https://www.reddit.com/r/roguelikedev/comments/1w5xgp3/how_long_should_a_monster_remember_and_what_does/ | as R4 | Last tile seen plus timestamp, then follow a heat trail (Brogue's scent); timers configurable per NPC type; hunter follows longer, grunt gives up; "if that room has two doors and I exit, it will give up after it sees the room empty" | Retracted my claim, proposed that a scent trail is a lossy form of the same belief field, asked whether the give-up rule uses the room's exits | **New assumption** (replacing a wrong one): negative information *is* implemented in practice, but scoped to a room as a give-up rule, not to a cell as a likelihood |
+| R6 | Reddit | r/roguelikedev | https://www.reddit.com/r/roguelikedev/comments/1w5xgp3/how_long_should_a_monster_remember_and_what_does/ | as R4 | Unerring chase is annoying; omniscience is fine for a psionic because it is thematically justified; tiered behaviour: engage on sight, move relative to last known on losing LOS, and on fully losing, warn others, call reinforcements, or return to previous tasks | Named legibility as the real axis, admitted my action set has no way to stop, asked what makes giving up read as reasonable rather than broken | **Change to the agent:** add a sixth action, `resume_post` |
+| R7 | Reddit | r/roguelikedev | https://www.reddit.com/r/roguelikedev/comments/1w5xgp3/how_long_should_a_monster_remember_and_what_does/ | as R4 | Challenged whether a probability field is what a person actually does; a hot/cold scent trail is enough; you need a hierarchy of senses (sight beats a noise next door) and a trail can be broken by water; monsters enter a "where did they go?" state where they look around and **pace back and forth to show their consternation**, then return to patrol | Agreed the grid is bookkeeping not cognition, mapped the sense hierarchy onto likelihood weights, said the pacing had caught me out, asked how long the state runs before it reads as a bug | **New failure condition, redefined:** the failure is not oscillation, it is *unbounded and illegible* oscillation |
+| R8 | Reddit | r/roguelikedev | https://www.reddit.com/r/roguelikedev/comments/1w5xgp3/how_long_should_a_monster_remember_and_what_does/ | as R4 | On losing LOS, record the last position **and a vector towards it**; move to the position, then continue along the vector; after a few turns return to idle or patrol, and back to the patrol zone if it has one | Pointed out the vector is a one-step prediction where everyone else stores only a point, asked whether it updates after LOS breaks and whether it bends round corners | **New assumption:** shipped memory models form a ladder of increasingly lossy approximations to a Bayes filter |
+| R9 | LinkedIn | comment on the day one post | https://www.linkedin.com/posts/aqeeb-rizwan_i-am-spending-the-next-seven-days-building-activity-7500969198026694657-mbBX?utm_source=share&utm_medium=member_desktop&rcm=ACoAABsRqwkB4z4VK4-Qo7e2nHYcwMhvoxxjw2g | Day one post: building a game AI whose objective is to lose convincingly | Do not make the AI as optimal as possible. NPCs are usually advised to miss the first couple of shots so the player can react (e.g. Uncharted 4); when a player hides, some teams path the enemy *closer* to build tension and offer a takedown (e.g. Horizon Zero Dawn). Also assumed the project uses flow fields | Not yet replied | **No change, with the reason:** this is a limitation to state, not a mechanism to build |
 
 ---
 
 ## R1. r/GameAI, commenter 1: the Alien: Isolation lead
 
-**Link:** [LINK: fill in]
+**Link:** (https://www.reddit.com/r/gameai/comments/1w5uf2p/comment/p7i134y/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button)
 
 **What they said.** That they would need to double check what other games have done with
 probability fields, but that I was getting close to this territory, with a link to the Game
@@ -71,6 +71,13 @@ agent never holds ground truth at all.
 
 **Outcome, exactly one: new assumption.**
 
+> **[A-07] — RETRACTED 2026-09-10. See `research-file.md`, "ERROR 3".** The practitioner review
+> found that Isla published occupancy maps for game AI in *AI Game Programming Wisdom 3* (2006)
+> and shipped *Third Eye Crime* on them in 2013. Games did not represent belief only discretely
+> and the probabilistic machinery did not stay in robotics. R1, R2 and R9 below appeared to
+> confirm this assumption and none of them had read the games AI literature; four people
+> agreeing is not verification. The original wording is kept for the record:
+>
 > **[A-07]** Shipped game AI derives NPC belief subtractively, by degrading engine-side ground
 > truth, rather than additively, by accumulating evidence from noisy observations. Sources so
 > far: Isla on Halo 2 (published), the Alien: Isolation director (published, verified above),
@@ -86,7 +93,7 @@ settles it.
 
 ## R2. r/GameAI, commenter 2: subtractive belief, and where my baseline came from
 
-**Link:** [LINK: fill in]
+**Link:** https://www.reddit.com/r/gameai/comments/1w5uf2p/comment/p7jxqd2/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
 
 **What they said.** That in-game AI has no sensor noise by default because the engine knows
 the pixel-level position, and that what is actually implemented is an artificial reduction of
@@ -117,7 +124,7 @@ already cost me once.
 
 ## R3. r/GameAI, commenter 3: the cost objection
 
-**Link:** [LINK: fill in]
+**Link:** https://www.reddit.com/r/gameai/comments/1w5uf2p/comment/p7ki9aq/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
 
 **What they said.** That it is computationally suicidal to solve for noise the way the real
 world forces you to, that I already have a clean room and should optimise for the clean room,
@@ -152,7 +159,7 @@ particles remains an honest limitation to state, not a change to make now.
 
 ## R4. r/roguelikedev, commenter 1: points of interest as a prior
 
-**Link:** [LINK: fill in]
+**Link:** https://www.reddit.com/r/roguelikedev/comments/1w5xgp3/comment/p7k7f6m/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
 
 **What they said.** Make the monster visit points of interest, such as possible exits or heal
 sources, so it feels like it is hunting the player. Alternatively, have it randomly visit
@@ -181,7 +188,7 @@ prediction is the thing players call cheap.
 
 ## R5. r/roguelikedev, commenter 2: the answer that corrected me
 
-**Link:** [LINK: fill in]
+**Link:** (https://www.reddit.com/r/roguelikedev/comments/1w5xgp3/comment/p7kix5u/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button)
 
 **What they said.** A sensor-based approach: on line of sight, mark the last tile seen and
 the timestamp. On losing line of sight, path to that last known tile and then follow a heat
@@ -219,7 +226,7 @@ position that the decay rate is where NPC personality actually lives.
 
 ## R6. r/roguelikedev, commenter 3: legibility, and the action I was missing
 
-**Link:** [LINK: fill in]
+**Link:** https://www.reddit.com/r/roguelikedev/comments/1w5xgp3/comment/p7kwi1o/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
 
 **What they said.** As a player, they find it annoying when enemies chase unerringly. It is
 acceptable for an enemy that can reasonably track the player, such as a psionic which for all
@@ -259,7 +266,7 @@ terminal action, two near-equal cells leave the policy switching between them fo
 
 ## R7. r/roguelikedev, commenter 4: the failure condition I had backwards
 
-**Link:** [LINK: fill in]
+**Link:** (https://www.reddit.com/r/roguelikedev/comments/1w5xgp3/comment/p7kzyjs/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button)
 
 **What they said.** Quoted "probability field" and "mass diffuses along walkable cells" back at
 me and asked whether that is really what goes through the average person's head when following
@@ -310,7 +317,7 @@ terminal action until [G-04] lands.
 
 ## R8. r/roguelikedev, commenter 5: the vector, and a ladder for the related work
 
-**Link:** [LINK: fill in]
+**Link:** (https://www.reddit.com/r/roguelikedev/comments/1w5xgp3/comment/p7mj43w/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button)
 
 **What they said.** In simple cases, when a hostile NPC loses line of sight it records the
 player's last position **and a vector towards it**. It moves to the recorded position, and if it
@@ -350,7 +357,7 @@ record.
 
 ## R9. LinkedIn, comment on the day one post: the thing the cost function cannot express
 
-**Link:** [LINK: fill in]
+**Link:** (https://www.linkedin.com/feed/update/urn:li:activity:7500969198026694657?commentUrn=urn%3Ali%3Acomment%3A%28activity%3A7500969198026694657%2C7501606947113181184%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287501606947113181184%2Curn%3Ali%3Aactivity%3A7500969198026694657%29)
 
 **What they said.** Encouragement, an assumption that the project uses flow fields, and then
 the part that matters: do not try to make the AI as optimal as possible, because AI serves

@@ -34,7 +34,8 @@ PARAMS: dict[str, float] = {
     "poi_weight": 2.0,       # [ASSUMED] pull toward chokepoints, policy B only
 
     # observation model, per event type
-    "sighting_hit": 0.95,    # [ASSUMED] P(see the player | player is in a visible cell)
+    "sighting_hit": 0.95,    # [ASSUMED] P(report a sighting | player is in the sighted cell)
+    "sighting_sigma": 1.0,   # [ASSUMED] cells of slop on a sighting. Tight: you saw them.
     "sighting_floor": 0.01,  # [ASSUMED] P(report a sighting | player is elsewhere)
     "sound_sigma": 2.2,      # [ASSUMED] how sharply a sound localises, in walking steps
     "sound_floor": 0.04,     # [ASSUMED] a noise that was not the player
@@ -170,8 +171,27 @@ class BeliefGrid:
     def _positive_likelihood(self, obs: Observation, agent_cell: tuple[int, int]) -> np.ndarray:
         p = self.params
         if obs.kind == "sighting":
-            visible = world.visible_from(agent_cell)
-            like = np.where(visible, p["sighting_hit"], p["sighting_floor"])
+            # A sighting localises. It is the sharpest evidence the agent ever gets, and
+            # `sighting_sigma` is deliberately much tighter than the sound model: seeing
+            # someone tells you roughly which cell, hearing them tells you roughly which room.
+            #
+            # The first version of this ignored `obs.cell` entirely and spread the likelihood
+            # across every cell visible from the agent, which read as "the player is somewhere
+            # in my field of view". That was consistent with its own docstring and consistent
+            # inside the experiment, since a sighting is only ever emitted when line of sight
+            # exists, so nothing looked broken. It was still throwing away the location of the
+            # single most precise observation the agent receives. Found while building the
+            # decision record, where injecting a sighting the guard could not possibly have
+            # made produced a confident update about the wrong side of the map.
+            #
+            # Whether a sighting *can* happen is the simulator's business and it checks line of
+            # sight before emitting one. The likelihood's only job is to say where the player
+            # must have been for that report to arrive, so it no longer consults visibility.
+            dist = world.distances_from(obs.cell)
+            finite = np.where(np.isfinite(dist), dist, 1e6)
+            sigma = p["sighting_sigma"]
+            like = (p["sighting_hit"] * np.exp(-(finite ** 2) / (2 * sigma ** 2))
+                    + p["sighting_floor"])
             return np.where(world.FREE, like, 0.0)
 
         if obs.kind == "door":

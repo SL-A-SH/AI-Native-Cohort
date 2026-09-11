@@ -169,12 +169,13 @@ class TacticalAgent:
         poi_weighted: bool = False,
         costs: dict[str, float] | None = None,
         sight_radius: float = 7.0,
+        belief_params: dict[str, float] | None = None,
     ):
         self.cell = start
         self.home_post = home_post
         self.sight_radius = sight_radius
         self.costs = dict(COSTS if costs is None else costs)
-        self.belief = BeliefGrid(poi_weighted=poi_weighted)
+        self.belief = BeliefGrid(poi_weighted=poi_weighted, params=belief_params)
 
         self.tick = 0
         # Ticks since the last *positive* observation. Drives the staleness term on holding:
@@ -209,8 +210,15 @@ class TacticalAgent:
         """
         visible = world.visible_from(self.cell, radius=self.sight_radius)
         cells = tuple((int(r), int(c)) for r, c in zip(*np.where(visible)))
-        for cell in cells:
-            self.last_cleared[cell] = self.tick
+
+        # Only record a clear on a tick where nothing was detected. If a sighting or a sound
+        # arrived this tick the search did not fail, and stamping the player's own cell as
+        # "checked and empty" is both wrong and the thing that made the agent freeze next to
+        # them. `ticks_since_evidence` is zero exactly when a positive observation landed this
+        # tick, because `observe` resets it and `execute` increments it at the end.
+        if self.ticks_since_evidence > 0:
+            for cell in cells:
+                self.last_cleared[cell] = self.tick
         return Observation("search", self.cell, tick=self.tick, cells=cells)
 
     # ------------------------------------------------------------------------ the costing
@@ -286,26 +294,25 @@ class TacticalAgent:
         Negative, because it offsets cost. Priced in the same units as everything else: mass
         resolved is failure-ticks not paid later.
 
-        **Only mass in cells it has not recently cleared counts.** The first version credited
-        every cell visible from the target, every tick, which meant an agent standing where it
-        could see most of its own belief was paid the entire episode's value for staying still,
-        and paid it again on the next tick, and the next. The forty-case run showed the
-        consequence exactly: 87% of all decisions were `hold_position`, including cases where
-        the agent could see the player three steps away and simply watched. Holding scored
-        -36.18 against -22.27 for walking over to look.
+        **Gain reads the belief and nothing else.** An earlier version also excluded every cell
+        the agent had looked at within `clear_memory`, on the reasoning that looking twice tells
+        you little. That was double counting, and a practitioner review caught it: the filter
+        has *already* multiplied those cells by the miss rate when the failed search was
+        applied, so the mask subtracted the same negative information a second time.
 
-        The error was conflating *observing* mass with *resolving* it. Seeing a cell tells the
-        agent whether the player is in it; it does not end anything, and looking at the same
-        cell a second time tells it almost nothing it did not already know. Counting only
-        uncleared cells is what makes information gain actually diminish, which is the property
-        the word "gain" was claiming all along.
+        Measured on a sighting: the sighted cell's belief falls 0.2181 to 0.0528, which is the
+        filter working, and the gain for going there fell -23.73 to -2.10, which is the mask
+        removing what the filter had already removed. The agent then held on a tick where it had
+        just seen the player. That is the mechanism behind failure F1, and it is a bookkeeping
+        bug rather than the design tension the failure analysis originally called it. Adding a
+        seventh cost term to reward closing distance would have papered over it.
+
+        The filter is the only place negative information belongs. `last_cleared` now feeds the
+        redundancy term alone, which is a statement about what a *watching player* would
+        recognise as "it just checked there", not a statement about probability.
         """
         visible = world.visible_from(target, radius=self.sight_radius)
-        fresh = visible.copy()
-        for cell, seen in self.last_cleared.items():
-            if self.tick - seen < self.costs["clear_memory"]:
-                fresh[cell] = False
-        mass = float(self.belief.belief[fresh].sum())
+        mass = float(self.belief.belief[visible].sum())
         return -mass * self.costs["miss_per_tick"] * self.costs["horizon_ticks"]
 
     # -------------------------------------------------------------------------- the options
@@ -504,22 +511,33 @@ class TacticalAgent:
         entropy = self.belief.normalised_entropy()
         ratio = self.belief.evidence_ratio(peak)
 
-        # The human reasoning function, stated in the agent's own terms. This is a description
-        # of a comparison that already happened, not a second rule applied on top of it.
-        if best.action in TERMINAL:
-            reason = (f"nothing worth doing: best active option cost {second.total:+.2f}, "
-                      f"uncertainty {entropy:.2f}")
-        elif best.action == "hold_position":
-            reason = (f"too little to go on to commit: uncertainty {entropy:.2f}, "
-                      f"peak traceability {ratio:.2f}")
-        elif best.terms.get("illegibility", 0.0) >= max(
-                (v for k, v in best.terms.items() if v > 0 and k != "illegibility"), default=0.0):
-            reason = (f"acting on weakly supported belief: traceability "
-                      f"{self.belief.evidence_ratio(best.target):.2f}, "
-                      f"{self.unattributable_fraction(best.target):.0%} unaccounted for")
-        else:
-            reason = (f"following the evidence: peak {peak} at {self.belief.belief[peak]:.3f}, "
-                      f"traceability {ratio:.2f}")
+        # The human reasoning function, stated in the agent's own terms.
+        #
+        # **Derived from the winning option's actual terms, never from its name.** The first
+        # version wrote a fixed sentence per action, and the failure analysis caught it lying:
+        # every `hold_position` was logged as "too little to go on to commit", including cases
+        # where the agent was reporting a traceability of 151 and an uncertainty of 0.41. It
+        # was not holding because it knew too little. It was holding because holding cost 1.00
+        # while every alternative was penalised past 11. A reason string that contradicts the
+        # numbers beside it is worse than no reason string, because the decision record is
+        # supposed to be auditable and that one would have been audited against itself.
+        #
+        # So the reason names what actually decided it: the biggest thing pushing the winner
+        # up, the biggest thing pulling it down, and how close the runner-up came.
+        pushed_up = max(((v, k) for k, v in best.terms.items() if v > 0), default=(0.0, ""))
+        pulled_down = min(((v, k) for k, v in best.terms.items() if v < 0), default=(0.0, ""))
+        parts = [f"{best.action}"]
+        if best.target and best.action != "hold_position":
+            parts.append(f"-> {best.target}")
+        parts.append(f"at {best.total:+.2f}")
+        if pulled_down[1]:
+            parts.append(f"drawn by {pulled_down[1]} {pulled_down[0]:+.2f}")
+        if pushed_up[1]:
+            parts.append(f"held back by {pushed_up[1]} {pushed_up[0]:+.2f}")
+        parts.append(f"next best {second.action} {second.total:+.2f}")
+        parts.append(f"H {entropy:.2f}")
+        parts.append(f"peak traceability {ratio:.1f}")
+        reason = "; ".join(parts)
 
         return Decision(
             tick=self.tick,

@@ -1,0 +1,5 @@
+arm,negative_info,memory,redundant,redundant_sd,rate,rate_sd,capture,capture_sd
+neither,False,False,309.625,47.80151,0.36315,0.02068,0.73438,0.04319
+negative info only,True,False,23.25,9.16174,0.02854,0.01014,0.71875,0.06343
+memory only,False,True,1.0,1.0,0.00243,0.00247,0.65938,0.03046
+full agent,True,True,10.875,5.37209,0.01358,0.00655,0.72188,0.0785

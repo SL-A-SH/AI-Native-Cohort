@@ -119,26 +119,42 @@ def sweep_seeds(n_cases: int) -> None:
 
 
 def sweep_dither(n_cases: int) -> None:
-    """The believability weight the day 3 post refused to tune, run across its whole range."""
-    cases = build_cases(n_cases)
+    """The believability weight the day 3 post refused to tune, run across its whole range.
+
+    **Across every generation seed, not one.** The first version of this called `build_cases`
+    without a seed, so the whole sweep was a single set of 40 cases: every capture figure came
+    out a multiple of 2.5%, which is 1 in 40, and a practitioner review spotted exactly that.
+    Reporting a parameter's effect from one seed is the failure lesson 6 exists to prevent, and
+    it had been avoided in the seed sweep two functions above while being committed here.
+    """
     rows_out = []
 
-    print(f"dither weight sweep, {n_cases} cases, belief agent (policy A)")
-    head = (f"{'dither':>7s} {'capture':>9s} {'switches':>9s} {'redundant':>10s} "
-            f"{'attribution':>12s} {'ticks':>7s}")
+    print(f"dither weight sweep, {len(GEN_SEEDS)} seeds x {n_cases} cases, "
+          f"belief agent (policy A)")
+    head = (f"{'dither':>7s} {'capture':>16s} {'switches':>15s} {'redundant':>14s} "
+            f"{'attribution':>12s}")
     print(head)
     print("-" * len(head))
 
     for weight in DITHER_WEIGHTS:
         costs = dict(COSTS)
         costs["dither"] = weight
-        result = one_run(cases, "belief", False, costs)
-        rows_out.append({"dither": weight,
-                         **{k: round(v, 4) if isinstance(v, float) else v
-                            for k, v in result.items()}})
-        print(f"{weight:7.1f} {result['capture']:9.1%} {result['switches']:9d} "
-              f"{result['redundant']:10d} {result['attribution']:12.2f} "
-              f"{result['ticks']:7.1f}")
+        runs = []
+        for gen_seed in GEN_SEEDS:
+            cases = build_cases(n_cases, gen_seed=gen_seed)
+            runs.append(one_run(cases, "belief", False, costs))
+
+        summary = {"dither": weight}
+        for key in ("capture", "switches", "redundant", "attribution", "ticks"):
+            vals = [r[key] for r in runs]
+            summary[key] = round(float(np.mean(vals)), 4)
+            summary[f"{key}_sd"] = round(float(np.std(vals)), 4)
+        rows_out.append(summary)
+
+        print(f"{weight:7.1f} {summary['capture']:9.1%} +/-{summary['capture_sd']:5.1%} "
+              f"{summary['switches']:8.1f} +/-{summary['switches_sd']:5.1f} "
+              f"{summary['redundant']:7.1f} +/-{summary['redundant_sd']:5.1f} "
+              f"{summary['attribution']:12.2f}")
 
     with open(RESULTS / "sweep-dither.csv", "w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(fh, fieldnames=list(rows_out[0].keys()))
